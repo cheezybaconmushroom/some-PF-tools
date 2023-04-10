@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<!--Project Name: Case Calculator-->
+<!--Author: Sert-->
+<!--Project Creation Date: 4-10-2023-->
+<!--Description: calculates the price of the case you chose, made for PF-->
+<html>
+	<head>
+		<title>Case Cost Calculator</title>
+		<link rel="shortcut icon" href="data:image/x-icon;base64,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" type="image/x-icon">
+		<style>
+        h1{
+        margin-left: 10px;
+        font-family: sans-serif;
+        color: white;
+        }
+        h2{
+        margin-left: 10px;
+        font-family: sans-serif;
+        color: white;
+    	}
+        p{
+        margin-left: 10px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 650;
+        color: white;
+        }
+        span {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: white;
+        font-weight: 400;
+        }
+        label {
+        margin-left: 10px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: bold;
+        color: white;
+        }
+        input {
+        border-style: hidden;
+        border-width: 1.5px;
+        background-color: rgba(0, 0, 0, 0.565);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: 650;
+        color: white;
+        }
+        button {
+        margin-left: 10px;
+        background-color: rgba(0, 0, 0, 0.565);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-weight: bold;
+        color: white;
+        border: hidden;
+        width: 120px;
+        height: 50px;
+        }
+        body {
+        background-color: #303030;
+        opacity: 1;
+        background: radial-gradient(circle, transparent 20%, #303030 20%, #303030 80%, transparent 80%, transparent), radial-gradient(circle, transparent 20%, #303030 20%, #303030 80%, transparent 80%, transparent) 100px 100px, linear-gradient(#535353 2px, transparent 2px) 0 -4px, linear-gradient(90deg, #535353 2px, #303030 2px) -4px 0;
+        background-size: 200px 200px, 200px 200px, 100px 100px, 100px 100px;
+        }
+        select {
+        	margin-left: 5px;
+        	background-color: rgba(0, 0, 0, 0.565);
+        	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        	font-weight: bold;
+        	color: white;
+        	border: hidden;
+        }
+        option {
+        	background-color: rgba(0, 0, 0, 1);
+        	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        	font-weight: bold;
+        	color: white;
+        	border: hidden;
+        }
+        optgroup {
+        	background-color: rgba(0, 0, 0, 1);
+        	font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        	font-weight: bold;
+        	color: white;
+        	border: hidden;
+        }
+        .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        }
+        .helpboxoverlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 0;
+        }
+        </style>
+	</head>
+	<body>
+		<div class="overlay">
+			<h1>Case Cost Calculator</h1>
+			<form id="form1" name="form1" action="">
+				<label for="sel1">case: </label>
+				<select id="sel1">
+					<optgroup label="Tier 1">
+					<option value="50">Starter 1</option>
+					<option value="50">Starter 2</option>
+					<option value="50">Starter 3</option>
+					<option value="50">Starter 4</option>
+					<option value="75">Camo</option>
+					<option value="75">Cuboid</option>
+					<option value="75">Tribal</option>
+					</optgroup>
+					<optgroup label="Tier 2">
+					<option value="100">Fauna</option>
+					<option value="100">Fauna 2</option>
+					<option value="100">Glaciate</option>
+					<option value="100">Japan</option>
+					<option value="100">Uniform</option>
+					<option value="100">Uniform 2</option>
+					<option value="100">Wood</option>
+					<option value="100">Wood 2</option>
+					<option value="100">Worn&Torn</option>
+					<option value="140">DR Case</option>
+					</optgroup>
+					<optgroup label="Tier 3">
+					<option value="110">Rainbow</option>
+					<option value="120">Crimbo</option>
+					<option value="120">Space</option>
+					<option value="150">Cold Front</option>
+					<option value="150">Halloween</option>
+					<option value="150">Pacific</option>
+					<option value="150">Ripple</option>
+					<option value="160">COR5</option>
+					<option value="160">Christmas</option>
+					<option value="160">Monster</option>
+					<option value="180">Ghost</option>
+					<option value="180">Phantom</option>
+					</optgroup>
+					<optgroup label="Tier 4">
+					<option value="200">Be Mine</option>
+					<option value="200">Canada*</option>
+					<option value="200">Indie Horror</option>
+					<option value="200">Japan*</option>
+					<option value="200">MLG</option>
+					<option value="200">Meme</option>
+					<option value="200">Meme 2</option>
+					<option value="200">SCL</option>
+					<option value="200">Sinus</option>
+					<option value="200">Topgraph</option>
+					<option value="200">Uniform 2*</option>
+					<option value="200">Uniform*</option>
+					<option value="200">War Paint</option>
+					<option value="220">Retro</option>
+					</optgroup>
+					<optgroup label="Tier 5">
+					<option value="Creator">Creator</option>
+					<option value="250">Grunge</option>
+					<option value="250">Halftone</option>
+					<option value="250">Pattern</option>
+					<option value="250">Pattern 2</option>
+					<option value="250">Smrkndev</option>
+					<option value="250">Tech</option>
+					</optgroup>
+				</select> <br><br>
+				<label># of cases: </label>
+				<input type="number" name="amount1" id="amount1" placeholder="1" required>
+				<br><br>
+				<button type="button" onclick="out1()">GO!</button>
+			</form>
+			
+			<h2>Results</h2>
+			<p>Cost of cases: <span id="total1"> </span></p>
+			<p>Cost of keys: <span id="total2"> </span></p>
+			<p>Cost of total: <span id="total3"> </span></p>
+			<script>
+				function out1() {
+					const opt1 = document.getElementById("sel1");
+  					const selectedopt = opt1.value;
+					const optInt = parseInt(selectedopt);
+					const creatorCaseBool1 = selectedopt === "Creator";
+					const caseCount = document.getElementById("amount1").value;
+					let caseCost, keyCost, totalCost;
+					
+					if (creatorCaseBool1) {
+					  caseCost = 230 * caseCount;
+					  keyCost = 450 * caseCount;
+					} else {
+					  caseCost = optInt * caseCount;
+					  keyCost = optInt * (caseCount * 2);
+					}
+					
+					totalCost = caseCost + keyCost;
+
+					//debugging logs
+					console.log(`The Cost of 1 case is ${selectedopt}`)
+					console.log(`isCreatorCase: ${creatorCaseBool1}`)
+					
+					//display functions
+					const totalout1 = document.getElementById("total1");
+					const totalout2 = document.getElementById("total2");
+					const totalout3 = document.getElementById("total3");
+					
+					totalout1.textContent = `$${caseCost}`;
+					totalout2.textContent = `$${keyCost}`;
+					totalout3.textContent = `$${totalCost}`;
+				}
+				//secret message :)))
+				const secretMsg = `
+				Yo
+
+				What are you doing here?
+				There are no secrets just debugging logs
+				So don't go around where you wouldn't tell a friend to
+
+				:)
+				`
+				console.log('\x1b[32m%s\x1b[0m' ,secretMsg)
+			</script>
+		</div>
+	</body>
+</html>
