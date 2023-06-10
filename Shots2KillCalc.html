@@ -90,32 +90,47 @@
 
   <body>
     <div class="overlay">
+
       <p id="helpbox" style="float: right; font-weight: bold; margin-right: 20px; position: relative;">This tool calculates the STK ranges in PF, enjoy</p>
+
       <h1>Killing Shots Range Calculator</h1>
       
+      <canvas id="canvas1" width="500" height="250" style="float: right; background-color: black; margin-right: 15px; border-style: solid; border-width: 2px; border-color: white;"></canvas>
+
+      <p style="float: right; margin-right: 10px; font-weight: bold;" id="canvasLabel"></p>
+
       <form>
         <label for="wepName">Weapon name: </label>
-        <input type="text" id="wepName" name="wepName" placeholder="BFG 50" onmouseenter="showtip(7)" onmouseleave="hidetip()"> <br><br>
+        <input type="text" id="wepName" name="wepName" placeholder="BFG 50" onmouseenter="showtip(1)" onmouseleave="hidetip()"> 
+        <br><br>
+
         <label for="mult">Multiplier: </label>
-        <input type="number" id="mult" name="mult" placeholder="1.0x" required onmouseenter="showtip(1)" onmouseleave="hidetip()"><br><br>
+        <input type="number" id="mult" name="mult" placeholder="1.0x" required onmouseenter="showtip(2)" onmouseleave="hidetip()">
+        <br><br>
 
         <label for="damage0">Maximum Damage: </label>
-        <input type="number" id="damage0" name="damage0" placeholder="30" required onmouseenter="showtip(2)" onmouseleave="hidetip()"><br><br>
+        <input type="number" id="damage0" name="damage0" placeholder="30" required onmouseenter="showtip(3)" onmouseleave="hidetip()">
+        <br><br>
 
         <label for="range0">Maximum Range: </label>
-        <input type="number" id="range0" name="range0" placeholder="50 studs" required onmouseenter="showtip(3)" onmouseleave="hidetip()"><br><br>
+        <input type="number" id="range0" name="range0" placeholder="50 studs" required onmouseenter="showtip(4)" onmouseleave="hidetip()">
+        <br><br>
 
         <label for="damage1">Damage at Dropoff: </label>
-        <input type="number" id="damage1" name="damage1" placeholder="20" required onmouseenter="showtip(4)" onmouseleave="hidetip()"><br><br>
+        <input type="number" id="damage1" name="damage1" placeholder="20" required onmouseenter="showtip(5)" onmouseleave="hidetip()">
+        <br><br>
 
         <label for="range1">Dropoff Range: </label>  
-        <input type="number" id="range1" name="range1" placeholder="100 studs" required onmouseenter="showtip(5)" onmouseleave="hidetip()"><br><br>
+        <input type="number" id="range1" name="range1" placeholder="100 studs" required onmouseenter="showtip(6)" onmouseleave="hidetip()">
+        <br><br>
 
-        <button type="button" onclick="calculate()" onmouseenter="showtip(6)" onmouseleave="hidetip()">Calculate</button>
+        <button type="button" onclick="calculate()" onmouseenter="showtip(7)" onmouseleave="hidetip()">Calculate</button>
         <button type="button" onclick="clearlogs()" onmouseenter="showtip(8)" onmouseleave="hidetip()">Clear</button>
       </form>
       <br>
+
       <!--result elements-->
+
       <div style="float: right; margin-right: 15px;">
         <table id="damagetables">
           <th>
@@ -136,142 +151,241 @@
       <p>Maximum Killing Shot Range: <span id="maxKillShotRange"></span></p>
 
       <script>
+        const canvasLabel = document.getElementById("canvasLabel");
+
+        const tablestuff = document.querySelector("#damagetables tbody");
+
+        const canvas1 = document.getElementById("canvas1");
+        const ctx = canvas1.getContext("2d");
+
+        //canvas res reminder: 500 x 250 (2:1) or in percentile ratio: 5:2.5
+        //draw lines n shit
+        /*
+        ctx.strokeStyle = "#666666";
+        ctx.lineWidth = 1;
+        ctx.fillStyle = '#666666';
+        ctx.font = '10px Segoe-UI';
+        */
+
+        const vertiGraphPos1 = [125, 250, 375];
+        const vertiGraphLabel1 = [100, 200, 300];
+        const horiGraphPos1 = [62.5, 125, 187.5, 250];
+        const horiGraphLabel1 = [100, 75, 50, 25];
+
+        function drawBG() {
+          //line properties
+          ctx.strokeStyle = "#666666";
+          ctx.lineWidth = 1;
+          ctx.fillStyle = '#666666';
+          ctx.font = '10px Segoe-UI';
+
+          //draw vertical lines
+          for (var i = 0; i < vertiGraphPos1.length; i++) {
+            ctx.beginPath();
+            ctx.moveTo(vertiGraphPos1[i], 0);
+            ctx.lineTo(vertiGraphPos1[i], 250);
+            ctx.stroke();
+            ctx.fillText(vertiGraphLabel1[i], vertiGraphPos1[i] + 2, 10);
+          }
+          //draw horizontal lines
+          for (var j = 0; j < horiGraphPos1.length; j++) {
+            ctx.beginPath();
+            ctx.moveTo(0, horiGraphPos1[j]);
+            ctx.lineTo(500, horiGraphPos1[j]);
+            ctx.stroke();
+            ctx.fillText(horiGraphLabel1[j], 5, horiGraphPos1[j] - 52);
+          }
+        }
+
+        drawBG();
+
+        function convertToPixels(num1, num2) {
+          return num1 * num2;
+        }
+
         function calculate() {
-          //variables
+          //VARIABLES
           const damage0Unmodified = parseFloat(document.getElementById("damage0").value);
-          const mult = parseFloat(document.getElementById("mult").value); console.log("the multiplier is: " + mult)
-          const range0 = parseFloat(document.getElementById("range0").value);
           const damage1Unmodified = parseFloat(document.getElementById("damage1").value);
-          const range1 = parseFloat(document.getElementById("range1").value);
-          const damage0 = damage0Unmodified * mult
-          const damage1 = damage1Unmodified * mult
           const wepName0 = document.getElementById("wepName").value;
-          var tablestuff = document.querySelector("#damagetables tbody");
+          const mult = parseFloat(document.getElementById("mult").value);
+          const range0 = parseFloat(document.getElementById("range0").value);
+          const range1 = parseFloat(document.getElementById("range1").value);
 
-          //max damage ranges arrays
-          var maxdamageRanges = [100, 50, 33.34, 25, 20, 16.67, 14.29, 12.5, 11.12, 10];
-          var maxshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+          //MULTED DAMAGE
+          const damage0 = damage0Unmodified * mult;
+          const damage1 = damage1Unmodified * mult;
 
-          //min damage ranges arrays
-          var mindamageRanges = [100, 99.99999, 49.99999, 33.33333, 24.99999, 16.66666, 14.28571, 12.49999, 11.11111, 9.99999];
-          var minshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+          //MAX DAMAGE ARRAY
+          const maxdamageRanges = [100, 50, 33.34, 25, 20, 16.67, 14.29, 12.5, 11.12, 10];
+          const maxshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-          //max damage array algorithm
+          //MIN DAMAGE ARRAY
+          const mindamageRanges = [100, 99.99999, 49.99999, 33.33333, 24.99999, 19.99999, 16.66666, 14.28571, 12.49999, 11.11111, 9.99999];
+          const minshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+
+          //MIN & MAX DAMAGE ARRAY ALGORITHM
           var maxDamageIndex = 0;
-          for (var i = 0; i < maxdamageRanges.length; i++) {
-            if (damage0 >= maxdamageRanges[i]) {
-              maxDamageIndex = i;
-              break;
-            }
-          }
-          //min damage array algorithm
           var minDamageIndex = 0;
-          for (var i = 0; i < maxdamageRanges.length; i++) {
-            if (damage1 >= maxdamageRanges[i]) {
-              minDamageIndex = i;
+
+          for (var k = 0; k < maxdamageRanges.length; k++) {
+            if (damage0 >= maxdamageRanges[k]) {
+              maxDamageIndex = k;
+
+              for (var l = 0; l < maxdamageRanges.length; l++) {
+                if (damage1 >= maxdamageRanges[l]) {
+                  minDamageIndex = l;
+                  break;
+                }
+              }
               break;
             }
           }
 
 
-          //slope-intercept math
-          const slope = (damage0 - damage1) / (range0 - range1); console.log("the slope is: "+ slope)
-          const intercept = damage0 - slope * range0; console.log("the intercept is: "+ intercept)
+          //SLOPE AND INTERCEPT MATH
+          const slope = (damage0 - damage1) / (range0 - range1);
+          const intercept = damage0 - slope * range0;
 
-          //Slope Math: calculate min shots to kill
-          var minkillShotRange = (maxdamageRanges[maxDamageIndex] - intercept) / slope;
-          var minShotsToKill = maxshotsToKill[maxDamageIndex];
-          if (minShotsToKill == 1) {
-            shotsOrShot = " shot"
-          } else {
-            shotsOrShot = " shots"
-          }
+          //SLOPE MATH: MIN STK
+          const minkillShotRange = (maxdamageRanges[maxDamageIndex] - intercept) / slope;
+          const minShotsToKill = maxshotsToKill[maxDamageIndex];
+          const shotsOrShot0 = minShotsToKill === 1 ? " shot" : " shots";
 
-          //Slope Math: calculate max shots to kill
-          var maxkillShotRange = (mindamageRanges[minDamageIndex] - intercept) / slope;
-          var maxShotsToKill = minshotsToKill[minDamageIndex];
-          if (maxShotsToKill == 1) {
-            shotsOrShot1 = " shot"
-          } else {
-            shotsOrShot1 = " shots"
-          }
+          //SLOPE MATH: MAX STK
+          const maxkillShotRange = (mindamageRanges[minDamageIndex] - intercept) / slope;
+          const maxShotsToKill = minshotsToKill[minDamageIndex];
+          const shotsOrShot1 = maxShotsToKill === 1 ? " shot" : " shots";
 
-          //display functions
-          if (maxshotsToKill == minShotsToKill || minShotsToKill == maxShotsToKill) {
+          //DISPLAY
+          if (maxshotsToKill == minShotsToKill) {
             textoutput1 = "it pretty much " + maxShotsToKill + " shots at any range";
             textoutput2 = "yea";
 
-            tablestuffxd = "<tr><td>" +
-            wepName0 + "</td><td>" +
-            damage0.toFixed(2) + "</td><td>" +
-            range0.toFixed(2) + "</td><td>" +
-            damage1.toFixed(2) + "</td><td>" +
-            range1.toFixed(2) + "</td><td>" + minShotsToKill + " at " +
-            "inf" + "</td><td>" + maxShotsToKill + " at " +
-            "inf" + "</td></tr>";
+            tablestuffxd = `<tr><td>
+            ${wepName0}</td><td>
+            ${damage0.toFixed(2)}</td><td>
+            ${range0.toFixed(2)}</td><td>
+            ${damage1.toFixed(2)}</td><td>
+            ${range1.toFixed(2)}</td><td>
+            ${minShotsToKill} at inf </td><td>
+            ${maxShotsToKill} at inf </td></tr>`;
           } else {
-            textoutput1 = minkillShotRange.toFixed(2) + " studs / " + minShotsToKill + shotsOrShot;
+            textoutput1 = minkillShotRange.toFixed(2) + " studs / " + minShotsToKill + shotsOrShot0;
             textoutput2 = maxkillShotRange.toFixed(2) + " studs / " + maxShotsToKill + shotsOrShot1;
 
-            tablestuffxd = "<tr><td>" +
-            wepName0 + "</td><td>" +
-            damage0.toFixed(2) + "</td><td>" +
-            range0.toFixed(2) + "</td><td>" +
-            damage1.toFixed(2) + "</td><td>" +
-            range1.toFixed(2) + "</td><td>" + minShotsToKill + " at " +
-            minkillShotRange.toFixed(2) + "</td><td>" + maxShotsToKill + " at " +
-            maxkillShotRange.toFixed(2) + "</td></tr>";
+            tablestuffxd = `<tr><td>
+            ${wepName0}</td><td>
+            ${damage0.toFixed(2)}</td><td>
+            ${range0.toFixed(2)}</td><td>
+            ${damage1.toFixed(2)}</td><td>
+            ${range1.toFixed(2)}</td><td>
+            ${minShotsToKill} at ${minkillShotRange.toFixed(2)}</td><td>
+            ${maxShotsToKill} at ${maxkillShotRange.toFixed(2)}</td></tr>`;
+
+            //clears any previously logged stk ranges
+            canvasLabel.innerHTML = "";
+
+            //guh
+            for (var m = 0; m < maxShotsToKill - minShotsToKill; m++) {
+              const tempIntercept1 = (maxdamageRanges[(minShotsToKill + m) - 1] - intercept) / slope;
+
+              canvasLabel.innerHTML += `${minShotsToKill + m} until ${tempIntercept1.toFixed(2)} studs <br>`;
+            }
           }
 
           document.getElementById("minKillShotRange").textContent = textoutput1;
           document.getElementById("maxKillShotRange").textContent = textoutput2;
 
           tablestuff.innerHTML += tablestuffxd
-        }
-        //Clears tables and result log
-        function clearlogs() {
-          var tablestuff = document.querySelector("#damagetables tbody");
 
-          tablestuff.innerHTML = "<td>weapon</td> <td>damage0</td> <td>range0</td> <td>damage1</td> <td>range1</td> <td>min shot range</td> <td>max shot range</td>";
+          //clear previously drawn graph
+          ctx.clearRect(0, 0, 500, 250);
+          drawBG();
+
+          //LINE PROPERTIES
+          ctx.lineWidth = 2;
+          ctx.fillStyle = 'white';
+          ctx.font = '14px Sans-Serif';
+
+          //DRAW MIN DAMAGE LINE
+          ctx.strokeStyle = 'green';
+          ctx.beginPath();
+          ctx.moveTo(0, 250 - convertToPixels(damage0, 2.5));
+          ctx.lineTo(convertToPixels(range0, 5)/4, 250 - convertToPixels(damage0, 2.5));
+          ctx.stroke();
+          ctx.fillText(damage0, convertToPixels(range0, 5)/8, 250 - convertToPixels(damage0, 2.5) - 5)
+          //DRAW DROPOFF LINE
+          ctx.strokeStyle = 'yellow';
+          ctx.beginPath();
+          ctx.moveTo(convertToPixels(range0, 5)/4, 250 - convertToPixels(damage0, 2.5));
+          ctx.lineTo(convertToPixels(range1, 5)/4, 250 - convertToPixels(damage1, 2.5));
+          ctx.stroke();
+          ctx.fillText(`${minShotsToKill} => ${maxShotsToKill}`, convertToPixels(range0, 5)/3, 250 - convertToPixels(damage0, 2.5) + 5);
+          //DRAW MIN DAMAGE LINE
+          ctx.strokeStyle = 'red';
+          ctx.beginPath();
+          ctx.moveTo(convertToPixels(range1, 5)/4, 250 - convertToPixels(damage1, 2.5));
+          ctx.lineTo(500, 250 - convertToPixels(damage1, 2.5));
+          ctx.stroke();
+          ctx.fillText(damage1, convertToPixels(range1, 5)/4, 250 - convertToPixels(damage1, 2.5) - 5);
+        }
+
+        //CLEAR TABLE AND RESULT LOG
+        function clearlogs() {
+          tablestuff.innerHTML = `<td>weapon</td> <td>damage0</td> <td>range0</td> <td>damage1</td> <td>range1</td> <td>min shot range</td> <td>max shot range</td>`;
+
+          //clear graph
+          ctx.clearRect(0, 0, 500, 250);
+          drawBG();
+
           document.getElementById("minKillShotRange").textContent = "";
           document.getElementById("maxKillShotRange").textContent = "";
+          canvasLabel.innerHTML = "";
+
         }
-        //tool tips
+
+        //TOOL TIPS
         function showtip(tipId) {
+
           str1 = document.getElementById("helpbox");
 
           switch(tipId) {
             case 1:
-              str1.innerHTML = "multiplier of weapon (required)";
+              str1.innerHTML = "Name of the weapon (optional)";
               break;
             case 2: 
-              str1.innerHTML = "close-up damage of your weapon (required)";
+              str1.innerHTML = "Multiplier of the weapon (required)";
               break;
             case 3: 
-              str1.innerHTML = "closeup damage range (required)";
+              str1.innerHTML = "closeup damage of the weapon (required)";
               break;
             case 4: 
-              str1.innerHTML = "far away damage (required)";
+              str1.innerHTML = "closeup damage range of the weapon (required)";
               break;
             case 5: 
-              str1.innerHTML = "far away damage range (required)";
+              str1.innerHTML = "far away damage of the weapon (required)";
               break;
             case 6: 
-              str1.innerHTML = "calcaulates everything you put in, make sure everything is filled";
+              str1.innerHTML = "far away damage range of the weapon (required)";
               break;
             case 7: 
-              str1.innerHTML = "Name of weapon (optional)";
+              str1.innerHTML = "Calculates the date you put in, make sure everything is filled";
               break;
             case 8: 
               str1.innerHTML = "clears everything below";
               break;
           }
         }
+
         function hidetip() {
+
           str1 = document.getElementById("helpbox");
 
           str1.innerHTML = "";
+
         }
+        
       </script>
     </div>
   </body>
