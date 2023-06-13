@@ -144,7 +144,7 @@
         </table>
       </div>
 
-      <p style="position: absolute; bottom: 0; right: 20px;">v1.2</p>
+      <p style="position: absolute; bottom: 0; right: 20px;">v1.3</p>
 
       <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold; color: white; margin-left: 10px;">Results</h2>
       <p>Minimum Killing Shot Range: <span id="minKillShotRange"></span></p>
@@ -159,14 +159,8 @@
         const ctx = canvas1.getContext("2d");
 
         //canvas res reminder: 500 x 250 (2:1) or in percentile ratio: 5:2.5
-        //draw lines n shit
-        /*
-        ctx.strokeStyle = "#666666";
-        ctx.lineWidth = 1;
-        ctx.fillStyle = '#666666';
-        ctx.font = '10px Segoe-UI';
-        */
 
+        //INCREMENT LINES COORDINATES
         const vertiGraphPos1 = [125, 250, 375];
         const vertiGraphLabel1 = [100, 200, 300];
         const horiGraphPos1 = [62.5, 125, 187.5, 250];
@@ -178,16 +172,19 @@
           ctx.lineWidth = 1;
           ctx.fillStyle = '#666666';
           ctx.font = '10px Segoe-UI';
+          ctx.textAlign = "left";
+          ctx.textBaseline = "middle";
 
-          //draw vertical lines
+
+          //DRAW VERTICAL LINES
           for (var i = 0; i < vertiGraphPos1.length; i++) {
             ctx.beginPath();
             ctx.moveTo(vertiGraphPos1[i], 0);
             ctx.lineTo(vertiGraphPos1[i], 250);
             ctx.stroke();
-            ctx.fillText(vertiGraphLabel1[i], vertiGraphPos1[i] + 2, 10);
+            ctx.fillText(vertiGraphLabel1[i], vertiGraphPos1[i] + 5, 9);
           }
-          //draw horizontal lines
+          //DRAW HORIZONTAL LINES
           for (var j = 0; j < horiGraphPos1.length; j++) {
             ctx.beginPath();
             ctx.moveTo(0, horiGraphPos1[j]);
@@ -204,11 +201,12 @@
         }
 
         function calculate() {
-          //VARIABLES
+          //INPUT VALUES
+          const wepName0 = document.getElementById("wepName").value;
           const damage0Unmodified = parseFloat(document.getElementById("damage0").value);
           const damage1Unmodified = parseFloat(document.getElementById("damage1").value);
-          const wepName0 = document.getElementById("wepName").value;
-          const mult = parseFloat(document.getElementById("mult").value);
+          const multUnmodified = parseFloat(document.getElementById("mult").value);
+          const mult = isNaN(multUnmodified) ? 1 : multUnmodified;
           const range0 = parseFloat(document.getElementById("range0").value);
           const range1 = parseFloat(document.getElementById("range1").value);
 
@@ -231,13 +229,12 @@
           for (var k = 0; k < maxdamageRanges.length; k++) {
             if (damage0 >= maxdamageRanges[k]) {
               maxDamageIndex = k;
-
-              for (var l = 0; l < maxdamageRanges.length; l++) {
-                if (damage1 >= maxdamageRanges[l]) {
-                  minDamageIndex = l;
-                  break;
-                }
-              }
+              break;
+            }
+          }
+          for (var l = 0; l < maxdamageRanges.length; l++) {
+            if (damage1 >= maxdamageRanges[l]) {
+              minDamageIndex = l;
               break;
             }
           }
@@ -258,7 +255,7 @@
           const shotsOrShot1 = maxShotsToKill === 1 ? " shot" : " shots";
 
           //DISPLAY
-          if (maxshotsToKill == minShotsToKill) {
+          if (maxShotsToKill == minShotsToKill) {
             textoutput1 = "it pretty much " + maxShotsToKill + " shots at any range";
             textoutput2 = "yea";
 
@@ -283,10 +280,10 @@
             ${minShotsToKill} at ${minkillShotRange.toFixed(2)}</td><td>
             ${maxShotsToKill} at ${maxkillShotRange.toFixed(2)}</td></tr>`;
 
-            //clears any previously logged stk ranges
+            //CLEAR PREV LOGGED STK RANGES
             canvasLabel.innerHTML = "";
 
-            //guh
+            //STK RANGES LOOP
             for (var m = 0; m < maxShotsToKill - minShotsToKill; m++) {
               const tempIntercept1 = (maxdamageRanges[(minShotsToKill + m) - 1] - intercept) / slope;
 
@@ -299,7 +296,23 @@
 
           tablestuff.innerHTML += tablestuffxd
 
-          //clear previously drawn graph
+          //GRAPH DATA
+          const startX = 0;
+          const startY = 250 - convertToPixels(damage0, 2.5);
+          const endX = convertToPixels(range0, 5) / 4;
+          const endY = startY;
+          const dropoffStartX = endX;
+          const dropoffStartY = endY;
+          const dropoffEndX = convertToPixels(range1, 5) / 4;
+          const dropoffEndY = 250 - convertToPixels(damage1, 2.5);
+          const minDamageStartX = dropoffEndX;
+          const minDamageStartY = dropoffEndY;
+          const minDamageEndX = 500;
+          const minDamageEndY = minDamageStartY;
+          const midX = (endX + minDamageStartX) / 2;
+          const midY = (endY + minDamageStartY) / 2;
+
+          //CLEAR PREV GRAPH
           ctx.clearRect(0, 0, 500, 250);
           drawBG();
 
@@ -307,35 +320,38 @@
           ctx.lineWidth = 2;
           ctx.fillStyle = 'white';
           ctx.font = '14px Sans-Serif';
+          ctx.textAlign = "center";
+          ctx.textBaseline = "alphabetic";
+
 
           //DRAW MIN DAMAGE LINE
           ctx.strokeStyle = 'green';
           ctx.beginPath();
-          ctx.moveTo(0, 250 - convertToPixels(damage0, 2.5));
-          ctx.lineTo(convertToPixels(range0, 5)/4, 250 - convertToPixels(damage0, 2.5));
+          ctx.moveTo(startX, startY);
+          ctx.lineTo(endX, endY);
           ctx.stroke();
-          ctx.fillText(damage0, convertToPixels(range0, 5)/8, 250 - convertToPixels(damage0, 2.5) - 5)
+          ctx.fillText(damage0, endX / 2, endY - 5);
           //DRAW DROPOFF LINE
           ctx.strokeStyle = 'yellow';
           ctx.beginPath();
-          ctx.moveTo(convertToPixels(range0, 5)/4, 250 - convertToPixels(damage0, 2.5));
-          ctx.lineTo(convertToPixels(range1, 5)/4, 250 - convertToPixels(damage1, 2.5));
+          ctx.moveTo(dropoffStartX, dropoffStartY);
+          ctx.lineTo(dropoffEndX, dropoffEndY);
           ctx.stroke();
-          ctx.fillText(`${minShotsToKill} => ${maxShotsToKill}`, convertToPixels(range0, 5)/3, 250 - convertToPixels(damage0, 2.5) + 5);
+          ctx.fillText(`${minShotsToKill} => ${maxShotsToKill}`, midX + 8, midY - 8);
           //DRAW MIN DAMAGE LINE
           ctx.strokeStyle = 'red';
           ctx.beginPath();
-          ctx.moveTo(convertToPixels(range1, 5)/4, 250 - convertToPixels(damage1, 2.5));
-          ctx.lineTo(500, 250 - convertToPixels(damage1, 2.5));
+          ctx.moveTo(minDamageStartX, minDamageStartY);
+          ctx.lineTo(minDamageEndX, minDamageEndY);
           ctx.stroke();
-          ctx.fillText(damage1, convertToPixels(range1, 5)/4, 250 - convertToPixels(damage1, 2.5) - 5);
+          ctx.fillText(damage1, (minDamageEndX / 2) + (range1 / 2), minDamageEndY - 5);
         }
 
         //CLEAR TABLE AND RESULT LOG
         function clearlogs() {
           tablestuff.innerHTML = `<td>weapon</td> <td>damage0</td> <td>range0</td> <td>damage1</td> <td>range1</td> <td>min shot range</td> <td>max shot range</td>`;
 
-          //clear graph
+          //CLEAR AND RESET GRAPH
           ctx.clearRect(0, 0, 500, 250);
           drawBG();
 
