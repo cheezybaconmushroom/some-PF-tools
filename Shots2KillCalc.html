@@ -1,9 +1,4 @@
 <!DOCTYPE html>
-<!--Project Name: STK ranges Calculator-->
-<!--Author: Sert, NanachiWithAGlock-->
-<!--Project Creation Date: 4-10-2023-->
-<!--Description: calculates the STK ranges of guns in PF, probably Serts biggest project besides the game we are working on-->
-<!--Graph by NanachiWithAGlock because Sert is not good with cartesian coordination and he gave up working on it-->
 <html>
   <head>
     <meta charset="UTF-8">
@@ -82,15 +77,6 @@
       background-color: rgba(0, 0, 0, 0.5);
       z-index: 1;
     }
-    .helpboxoverlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 0;
-    }
   </style>
 
   <body>
@@ -129,7 +115,7 @@
         <input type="number" id="range1" name="range1" placeholder="100 studs" required onmouseenter="showtip(6)" onmouseleave="hidetip()">
         <br><br>
 
-        <button type="button" onclick="calculate()" onmouseenter="showtip(7)" onmouseleave="hidetip()">Calculate</button>
+        <button type="button" onclick="calculate(0)" onmouseenter="showtip(7)" onmouseleave="hidetip()">Calculate</button>
         <button type="button" onclick="clearlogs()" onmouseenter="showtip(8)" onmouseleave="hidetip()">Clear</button>
       </form>
       <br>
@@ -149,7 +135,7 @@
         </table>
       </div>
 
-      <p style="position: absolute; bottom: 0; right: 20px;">v1.3</p>
+      <p style="position: absolute; bottom: 0; right: 20px;">v1.31</p>
 
       <h2 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: bold; color: white; margin-left: 10px;">Results</h2>
       <p>Minimum Killing Shot Range: <span id="minKillShotRange"></span></p>
@@ -205,27 +191,63 @@
           return num1 * num2;
         }
 
-        function calculate() {
+        function calculate(wepDebug) {
           //INPUT VALUES
-          const wepName0 = document.getElementById("wepName").value;
           const damage0Unmodified = parseFloat(document.getElementById("damage0").value);
           const damage1Unmodified = parseFloat(document.getElementById("damage1").value);
           const multUnmodified = parseFloat(document.getElementById("mult").value);
           const mult = isNaN(multUnmodified) ? 1 : multUnmodified;
-          const range0 = parseFloat(document.getElementById("range0").value);
-          const range1 = parseFloat(document.getElementById("range1").value);
+          let range0, range1, damage0, damage1, wepName0;
 
-          //MULTED DAMAGE
-          const damage0 = damage0Unmodified * mult;
-          const damage1 = damage1Unmodified * mult;
+          //DEBUG
+          //yeah yeah i created a faster way to shortcut weapon stats now pls stfu Nach i gave up on this project awhile ago
+          switch(wepDebug) {
+            case 0:
+              wepName0 = document.getElementById("wepName").value;
+              range0 = parseFloat(document.getElementById("range0").value);
+              range1 = parseFloat(document.getElementById("range1").value);
+              damage0 = damage0Unmodified * mult;
+              damage1 = damage1Unmodified * mult;
+              break;
+            case 1:
+              console.log("2 = SVDS")
+              console.log("3 = M16A3")
+              console.log("4 = M4A1")
+              break;
+            case 2: 
+              wepName0 = "SVDS";
+              damage0 = 70 * 1.43;
+              range0 = 70;
+              damage1 = 60 * 1.43;
+              range1 = 250;
+              break;
+            case 3: 
+              wepName0 = "M16A3";
+              damage0 = 32;
+              range0 = 80;
+              damage1 = 22;
+              range1 = 145;
+              break;
+            case 4: 
+              wepName0 = "M4A1";
+              damage0 = 34;
+              range0 = 35;
+              damage1 = 19;
+              range1 = 120;
+              break;
+            default:
+              console.log("Err: invalid parameter")
+              console.log("0 for default (data from form)")
+              console.log("1 for more help")
+          }
 
           //MAX DAMAGE ARRAY
-          const maxdamageRanges = [100, 50, 33.34, 25, 20, 16.67, 14.29, 12.5, 11.12, 10];
-          const maxshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+          const maxdamageRanges = [100, 50, 33.33334, 25, 20, 16.66667, 14.28572, 12.5, 11.11112, 10, 9.09091, 8.33334, 7.69231, 7.14286, 6.66667, 6.25, 5.88236, 5.55556, 5.26316, 5, 4.76191, 4.54546, 4.34783, 4.16667, 4];
+          const maxshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
 
           //MIN DAMAGE ARRAY
-          const mindamageRanges = [100, 99.99999, 49.99999, 33.33333, 24.99999, 19.99999, 16.66666, 14.28571, 12.49999, 11.11111, 9.99999];
-          const minshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+          const mindamageRanges = [100, 99.99999, 49.99999, 33.33333, 24.99999, 19.99999, 16.66666, 14.28571, 12.49999, 11.11111, 9.99999, 9.09089, 8.33332, 7.69229, 7.14284, 6.66666, 6.24999, 5.88234, 5.55554, 5.26314, 4.99999, 4.76189, 4.54544, 4.34781, 4.166666, 3.99999];
+          const minshotsToKill = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
 
           //MIN & MAX DAMAGE ARRAY ALGORITHM
           var maxDamageIndex = 0;
